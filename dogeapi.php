@@ -19,7 +19,7 @@ class DogeAPI
     private $api_key;
     private $valid_key = false;
     /**
-     * cURL GET request driver
+     * cURL GET request driver, and JSON check
      */
 
     private function _request($method, $path, $args = array())
@@ -45,7 +45,14 @@ class DogeAPI
         curl_close($ch);
 
         // Spit back the response object or fail
-        return $result ? json_decode($result) : false;        
+        return $this->isJson($result) ? json_decode($result) : false;
+    }
+
+    private function isJson($string)
+    {
+        json_decode($string);
+
+        return (json_last_error() == JSON_ERROR_NONE);
     }
 
     /**
@@ -68,7 +75,7 @@ class DogeAPI
         $validate = $this->_request('GET', '&a=get_balance');
         
         // Return true/false if key is valid
-        if ($validate == "Invalid API Key")
+        if ($validate == false || $validate == "Invalid API Key")
             $this->valid_key = false;
         else
             $this->valid_key = true;
